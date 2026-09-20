@@ -133,9 +133,8 @@ EMAIL_USE_TLS = env.bool('EMAIL_USE_TLS', default=True)
 
 
 # CORS / CSRF
-CORS_ALLOWED_ORIGINS = env.list('CORS_ALLOWED_ORIGINS', default=['http://localhost:5173'])
-CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS', default=['http://localhost:5173'])
-
+CORS_ALLOWED_ORIGINS = ['*']
+CSRF_TRUSTED_ORIGINS = ['*']
 
 # Django REST Framework
 REST_FRAMEWORK = {

@@ -18,7 +18,7 @@ environ.Env.read_env(BASE_DIR / '.env')
 
 SECRET_KEY = env('SECRET_KEY')
 DEBUG = env('DEBUG')
-ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['localhost', '127.0.0.1','fin-backend-seven.vercel.app','sivafinancialtracker.netlify.app','*'])
+ALLOWED_HOSTS =['*']
 
 
 INSTALLED_APPS = [

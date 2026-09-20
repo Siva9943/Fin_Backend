@@ -133,9 +133,15 @@ EMAIL_USE_TLS = env.bool('EMAIL_USE_TLS', default=True)
 
 
 # CORS / CSRF
-CORS_ALLOWED_ORIGINS = ['*']
-CSRF_TRUSTED_ORIGINS = ['*']
+CORS_ALLOWED_ORIGINS = [
+    "https://finfront.netlify.app",
+    "http://localhost:5173",
+]
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://finfront.netlify.app",
+    "http://localhost:5173",
+]
 # Django REST Framework
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (

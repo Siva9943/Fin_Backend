@@ -137,14 +137,12 @@ EMAIL_USE_TLS = env.bool('EMAIL_USE_TLS', default=True)
 
 # CORS / CSRF
 CORS_ALLOWED_ORIGINS = [
-    "https://finfront.netlify.app",
-    "https://fin-backend-7w8lu37l8-sivaprakashs-projects-9f09b0fc.vercel.app/",
+    "https://sivafinancialtracker.netlify.app/"
     "http://localhost:5173",
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://finfront.netlify.app",
-    "https://fin-backend-7w8lu37l8-sivaprakashs-projects-9f09b0fc.vercel.app/",
+    "https://sivafinancialtracker.netlify.app/",
     "http://localhost:5173",
 ]
 # Django REST Framework

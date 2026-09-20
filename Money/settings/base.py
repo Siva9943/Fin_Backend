@@ -20,7 +20,7 @@ SECRET_KEY = env('SECRET_KEY')
 DEBUG = env('DEBUG')
 ALLOWED_HOSTS = [
     "fin-backend-13e3bq9ay-sivaprakashs-projects-9f09b0fc.vercel.app",
-    "https://fin-backend-seven.vercel.app/",
+    "fin-backend-seven.vercel.app/",
     "localhost",
     "127.0.0.1",
 ]

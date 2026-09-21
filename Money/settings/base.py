@@ -19,7 +19,6 @@ environ.Env.read_env(BASE_DIR / '.env')
 SECRET_KEY = env('SECRET_KEY')
 DEBUG = env('DEBUG')
 ALLOWED_HOSTS = [
-    "fin-backend-ammjuvvja-sivaprakashs-projects-9f09b0fc.vercel.app",
     "fin-backend-seven.vercel.app",
     "localhost",
     ".vercel.app",
@@ -145,8 +144,17 @@ CORS_ALLOWED_ORIGINS = [
 
 CSRF_TRUSTED_ORIGINS = [
     "https://sivafinancialtracker.netlify.app",
+    "https://fin-backend-seven.vercel.app/api",
     "http://localhost:5173",
 ]
+SECURE_PROXY_SSL_HEADER = (
+    "HTTP_X_FORWARDED_PROTO",
+    "https",
+)
+
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+
 # Django REST Framework
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (

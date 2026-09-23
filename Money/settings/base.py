@@ -5,7 +5,7 @@ Shared by development.py and production.py.
 
 from datetime import timedelta
 from pathlib import Path
-
+import os 
 import environ
 from celery.schedules import crontab
 
@@ -220,6 +220,6 @@ CELERY_BEAT_SCHEDULE = {
 
 
 # Frontend / AI
-FRONTEND_URL = env('FRONTEND_URL', default='http://localhost:5173')
+FRONTEND_URL = env('FRONTEND_URL')
 AI_API_KEY = env('AI_API_KEY', default='')
 AI_MODEL = env('AI_MODEL', default='')

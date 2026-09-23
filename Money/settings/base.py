@@ -88,16 +88,7 @@ WSGI_APPLICATION = 'Money.wsgi.application'
 
 # Database
 DATABASES = {
-    "default": env.db(
-        "DATABASE_URL",
-        default=(
-            f"postgresql://{env('DB_USER', default='postgres')}:"
-            f"{env('DB_PASSWORD', default='')}@"
-            f"{env('DB_HOST', default='localhost')}:"
-            f"{env('DB_PORT', default='5432')}/"
-            f"{env('DB_NAME', default='money_manage')}"
-        )
-    )
+    "default": env.db("DATABASE_URL")
 }
 
 

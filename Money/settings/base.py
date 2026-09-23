@@ -137,6 +137,7 @@ EMAIL_USE_TLS = env.bool('EMAIL_USE_TLS', default=True)
 
 
 # CORS / CSRF
+
 CORS_ALLOWED_ORIGINS = [
     "https://sivafinancialtracker.netlify.app",
     "http://localhost:5173",
@@ -144,9 +145,9 @@ CORS_ALLOWED_ORIGINS = [
 
 CSRF_TRUSTED_ORIGINS = [
     "https://sivafinancialtracker.netlify.app",
-    "https://fin-backend-seven.vercel.app/api",
     "http://localhost:5173",
 ]
+
 SECURE_PROXY_SSL_HEADER = (
     "HTTP_X_FORWARDED_PROTO",
     "https",

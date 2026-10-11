@@ -50,7 +50,7 @@ SECRET_KEY = env("SECRET_KEY")
 DEBUG = env.bool("DEBUG", default=False)
 
 # Backend hostnames only: no https:// and no URL paths.
-ALLOWED_HOSTS =["fin-backend-seven.vercel.app"]
+ALLOWED_HOSTS =['fin-backend-seven.vercel.app']
 
 
 # ============================================================
@@ -248,7 +248,7 @@ EMAIL_USE_TLS = env.bool(
 
 FRONTEND_URL = env(
     "FRONTEND_URL",
-    default="https://sivafinancialtracker.netlify.app",
+    default="https://sivafinancialtracker.netlify.app/api",
 )
 
 

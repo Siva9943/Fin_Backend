@@ -49,8 +49,22 @@ def env_list(name, default=""):
 SECRET_KEY = env("SECRET_KEY")
 DEBUG = env.bool("DEBUG", default=False)
 
-# Backend hostnames only: no https:// and no URL paths.
-ALLOWED_HOSTS =['fin-backend-seven.vercel.app']
+# Backend hostnames only. Values pasted as full URLs (https://host/path) are
+# reduced to the bare host so a mis-typed env var can't take the API down.
+PRODUCTION_HOST = "fin-backend-seven.vercel.app"
+
+ALLOWED_HOSTS = [
+    host.split("://", 1)[-1].split("/", 1)[0]
+    for host in env_list("ALLOWED_HOSTS", default=PRODUCTION_HOST)
+]
+ALLOWED_HOSTS.append(PRODUCTION_HOST)
+
+# Vercel sets VERCEL_URL to the per-deployment hostname (preview deployments).
+if env("VERCEL_URL", default=""):
+    ALLOWED_HOSTS.append(env("VERCEL_URL"))
+
+if DEBUG:
+    ALLOWED_HOSTS += ["localhost", "127.0.0.1"]
 
 
 # ============================================================

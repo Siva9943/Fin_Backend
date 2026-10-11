@@ -11,6 +11,8 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Money.settings.development')
+# WSGI is only used by the hosted deployment; local runserver goes through
+# manage.py, which defaults to development settings.
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Money.settings.production')
 
 application = get_wsgi_application()

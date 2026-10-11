@@ -2,15 +2,15 @@ from .base import *  # noqa: F401,F403
 
 DEBUG = False
 
-# Static files are collected to STATIC_ROOT and served by WhiteNoise.
-# CompressedManifestStaticFilesStorage gzip/brotli-compresses them and appends
-# a content hash to each name so they can be cached forever.
+# Static files are served by WhiteNoise. The non-manifest storage is used so a
+# deployment where collectstatic didn't run (no staticfiles.json) can't turn
+# every {% static %} lookup — e.g. the admin — into a 500.
 STORAGES = {
     'default': {
         'BACKEND': 'django.core.files.storage.FileSystemStorage',
     },
     'staticfiles': {
-        'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+        'BACKEND': 'whitenoise.storage.CompressedStaticFilesStorage',
     },
 }
 

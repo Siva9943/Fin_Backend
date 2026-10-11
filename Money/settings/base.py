@@ -20,9 +20,8 @@ SECRET_KEY = env('SECRET_KEY')
 DEBUG = env('DEBUG')
 ALLOWED_HOSTS = [
     "fin-backend-seven.vercel.app",
-    "localhost",
+    "sivafinancialtracker.netlify.app",
     ".vercel.app",
-    "127.0.0.1",
 ]
 
 INSTALLED_APPS = [
@@ -131,12 +130,10 @@ EMAIL_USE_TLS = env.bool('EMAIL_USE_TLS', default=True)
 
 CORS_ALLOWED_ORIGINS = [
     "https://sivafinancialtracker.netlify.app",
-    "http://localhost:5173",
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     "https://sivafinancialtracker.netlify.app",
-    "http://localhost:5173",
 ]
 
 SECURE_PROXY_SSL_HEADER = (

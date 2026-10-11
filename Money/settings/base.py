@@ -3,76 +3,76 @@ Base Django settings for the Money (FinTrack) project.
 Shared by development.py and production.py.
 """
 
+import os
 from datetime import timedelta
 from pathlib import Path
 
-import environ
+from dotenv import load_dotenv
 from celery.schedules import crontab
 
 
-# ============================================================
-# BASE DIRECTORY AND ENVIRONMENT
-# ============================================================
+# =========================================================
+# BASE DIRECTORY & ENVIRONMENT VARIABLES
+# =========================================================
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
-env = environ.Env(
-    DEBUG=(bool, False),
+# Load variables from the project's .env file
+load_dotenv(BASE_DIR / ".env")
+
+
+def env_bool(name, default=False):
+    """Read a boolean environment variable."""
+    value = os.getenv(name)
+
+    if value is None:
+        return default
+
+    return value.strip().lower() in ("true", "1", "yes", "on")
+
+
+def env_int(name, default):
+    """Read an integer environment variable."""
+    value = os.getenv(name)
+
+    if value is None or value.strip() == "":
+        return default
+
+    return int(value)
+
+
+def env_list(name, default=None):
+    """Read comma-separated environment variables."""
+    value = os.getenv(name)
+
+    if value is None:
+        return default or []
+
+    return [item.strip() for item in value.split(",") if item.strip()]
+
+
+# =========================================================
+# SECURITY
+# =========================================================
+
+SECRET_KEY = os.getenv("SECRET_KEY")
+
+if not SECRET_KEY:
+    raise ValueError("SECRET_KEY must be configured in the environment.")
+
+DEBUG = env_bool("DEBUG", False)
+
+ALLOWED_HOSTS = env_list(
+    "ALLOWED_HOSTS",
+    ["localhost", "127.0.0.1"],
 )
 
-# Load local .env only when the file exists.
-# Production environment variables are supplied by the deployment platform.
-ENV_FILE = BASE_DIR / ".env"
 
-if ENV_FILE.exists():
-    environ.Env.read_env(ENV_FILE)
-
-
-def env_list(name, default=""):
-    """
-    Read comma-separated environment variables as Python lists.
-
-    Example:
-        ALLOWED_HOSTS=api.example.com,backend.example.com
-    """
-    return [
-        value.strip()
-        for value in env(name, default=default).split(",")
-        if value.strip()
-    ]
-
-
-# ============================================================
-# CORE SETTINGS
-# ============================================================
-
-SECRET_KEY = env("SECRET_KEY")
-DEBUG = env.bool("DEBUG", default=False)
-
-# Backend hostnames only. Values pasted as full URLs (https://host/path) are
-# reduced to the bare host so a mis-typed env var can't take the API down.
-PRODUCTION_HOST = "fin-backend-seven.vercel.app"
-
-ALLOWED_HOSTS = [
-    host.split("://", 1)[-1].split("/", 1)[0]
-    for host in env_list("ALLOWED_HOSTS", default=PRODUCTION_HOST)
-]
-ALLOWED_HOSTS.append(PRODUCTION_HOST)
-
-# Vercel sets VERCEL_URL to the per-deployment hostname (preview deployments).
-if env("VERCEL_URL", default=""):
-    ALLOWED_HOSTS.append(env("VERCEL_URL"))
-
-if DEBUG:
-    ALLOWED_HOSTS += ["localhost", "127.0.0.1"]
-
-
-# ============================================================
-# INSTALLED APPLICATIONS
-# ============================================================
+# =========================================================
+# APPLICATIONS
+# =========================================================
 
 INSTALLED_APPS = [
-    # Django applications
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -80,14 +80,14 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
 
-    # Third-party applications
+    # Third-party apps
     "rest_framework",
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
     "django_filters",
     "corsheaders",
 
-    # FinTrack applications
+    # FinTrack apps
     "apps.accounts",
     "apps.transactions",
     "apps.loans",
@@ -102,17 +102,14 @@ INSTALLED_APPS = [
 ]
 
 
-# ============================================================
+# =========================================================
 # MIDDLEWARE
-# ============================================================
+# =========================================================
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
-
-    # CORS must be before CommonMiddleware
     "corsheaders.middleware.CorsMiddleware",
-
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -122,18 +119,11 @@ MIDDLEWARE = [
 ]
 
 
-# ============================================================
-# URLS AND WSGI
-# ============================================================
+# =========================================================
+# URLS & TEMPLATES
+# =========================================================
 
 ROOT_URLCONF = "Money.urls"
-
-WSGI_APPLICATION = "Money.wsgi.application"
-
-
-# ============================================================
-# TEMPLATES
-# ============================================================
 
 TEMPLATES = [
     {
@@ -150,19 +140,32 @@ TEMPLATES = [
     },
 ]
 
+WSGI_APPLICATION = "Money.wsgi.application"
 
-# ============================================================
+
+# =========================================================
 # DATABASE
-# ============================================================
+# =========================================================
+
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+if not DATABASE_URL:
+    raise ValueError("DATABASE_URL must be configured in the environment.")
+
+import dj_database_url
 
 DATABASES = {
-    "default": env.db("DATABASE_URL"),
+    "default": dj_database_url.parse(
+        DATABASE_URL,
+        conn_max_age=600,
+        ssl_require=not DEBUG,
+    )
 }
 
 
-# ============================================================
+# =========================================================
 # PASSWORD VALIDATION
-# ============================================================
+# =========================================================
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -192,24 +195,21 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-# ============================================================
+# =========================================================
 # INTERNATIONALIZATION
-# ============================================================
+# =========================================================
 
 LANGUAGE_CODE = "en-us"
-
 TIME_ZONE = "UTC"
-
 USE_I18N = True
 USE_TZ = True
 
 
-# ============================================================
-# STATIC AND MEDIA FILES
-# ============================================================
+# =========================================================
+# STATIC & MEDIA FILES
+# =========================================================
 
 STATIC_URL = "/static/"
-
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
 STATICFILES_DIRS = [
@@ -224,156 +224,85 @@ MEDIA_ROOT = BASE_DIR / "media"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
-# ============================================================
+# =========================================================
 # EMAIL
-# ============================================================
+# =========================================================
 
-EMAIL_BACKEND = env(
+EMAIL_BACKEND = os.getenv(
     "EMAIL_BACKEND",
-    default="django.core.mail.backends.console.EmailBackend",
+    "django.core.mail.backends.console.EmailBackend",
 )
 
-EMAIL_HOST = env("EMAIL_HOST", default="")
-
-EMAIL_PORT = env.int(
-    "EMAIL_PORT",
-    default=587,
-)
-
-EMAIL_HOST_USER = env(
-    "EMAIL_HOST_USER",
-    default="",
-)
-
-EMAIL_HOST_PASSWORD = env(
-    "EMAIL_HOST_PASSWORD",
-    default="",
-)
-
-EMAIL_USE_TLS = env.bool(
-    "EMAIL_USE_TLS",
-    default=True,
+EMAIL_HOST = os.getenv("EMAIL_HOST", "")
+EMAIL_PORT = env_int("EMAIL_PORT", 587)
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
+EMAIL_USE_TLS = env_bool("EMAIL_USE_TLS", True)
+EMAIL_USE_SSL = env_bool("EMAIL_USE_SSL", False)
+DEFAULT_FROM_EMAIL = os.getenv(
+    "DEFAULT_FROM_EMAIL",
+    EMAIL_HOST_USER,
 )
 
 
-# ============================================================
-# FRONTEND CONFIGURATION
-# ============================================================
+# =========================================================
+# CORS & CSRF
+# =========================================================
 
-FRONTEND_URL = env(
-    "FRONTEND_URL",
-    default="https://sivafinancialtracker.netlify.app",
-)
+CORS_ALLOWED_ORIGINS = env_list("CORS_ALLOWED_ORIGINS")
+CSRF_TRUSTED_ORIGINS = env_list("CSRF_TRUSTED_ORIGINS")
 
-
-# ============================================================
-# CORS CONFIGURATION
-# ============================================================
-
-CORS_ALLOWED_ORIGINS = env_list(
-    "CORS_ALLOWED_ORIGINS",
-    default=FRONTEND_URL,
-)
-
-# JWT authentication uses the Authorization: Bearer header.
-# Enable credentials only if your architecture requires cross-origin cookies.
-CORS_ALLOW_CREDENTIALS = False
+CORS_ALLOW_CREDENTIALS = True
 
 
-# ============================================================
-# CSRF CONFIGURATION
-# ============================================================
-
-CSRF_TRUSTED_ORIGINS = env_list(
-    "CSRF_TRUSTED_ORIGINS",
-    default=FRONTEND_URL,
-)
-
-
-# ============================================================
-# HTTPS AND COOKIE SECURITY
-# ============================================================
-
-# Appropriate when the trusted deployment proxy sets this header correctly.
-SECURE_PROXY_SSL_HEADER = (
-    "HTTP_X_FORWARDED_PROTO",
-    "https",
-)
-
-# Enable secure cookies in production without breaking local HTTP development.
-SESSION_COOKIE_SECURE = not DEBUG
-CSRF_COOKIE_SECURE = not DEBUG
-
-SECURE_CONTENT_TYPE_NOSNIFF = True
-SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
-X_FRAME_OPTIONS = "DENY"
-
-
-# ============================================================
+# =========================================================
 # DJANGO REST FRAMEWORK
-# ============================================================
+# =========================================================
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
-
     "DEFAULT_PERMISSION_CLASSES": (
         "rest_framework.permissions.IsAuthenticated",
     ),
-
     "DEFAULT_FILTER_BACKENDS": (
         "django_filters.rest_framework.DjangoFilterBackend",
         "rest_framework.filters.SearchFilter",
         "rest_framework.filters.OrderingFilter",
     ),
-
     "DEFAULT_PAGINATION_CLASS": (
         "rest_framework.pagination.PageNumberPagination"
     ),
-
     "PAGE_SIZE": 20,
-
-    "EXCEPTION_HANDLER": (
-        "apps.core.exceptions.custom_exception_handler"
-    ),
+    "EXCEPTION_HANDLER": "apps.core.exceptions.custom_exception_handler",
 }
 
 
-# ============================================================
-# JWT AUTHENTICATION
-# ============================================================
+# =========================================================
+# SIMPLE JWT
+# =========================================================
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(
-        minutes=env.int(
-            "ACCESS_TOKEN_LIFETIME",
-            default=30,
-        )
+        minutes=env_int("ACCESS_TOKEN_LIFETIME", 30)
     ),
-
     "REFRESH_TOKEN_LIFETIME": timedelta(
-        days=env.int(
-            "REFRESH_TOKEN_LIFETIME",
-            default=7,
-        )
+        days=env_int("REFRESH_TOKEN_LIFETIME", 7)
     ),
-
     "ROTATE_REFRESH_TOKENS": True,
-
     "BLACKLIST_AFTER_ROTATION": True,
-
     "AUTH_HEADER_TYPES": ("Bearer",),
 }
 
 
-# ============================================================
-# REDIS AND CELERY
-# ============================================================
+# =========================================================
+# CELERY & REDIS
+# =========================================================
 
-REDIS_URL = env(
+REDIS_URL = os.getenv(
     "REDIS_URL",
-    default="redis://localhost:6379/0",
+    "redis://localhost:6379/0",
 )
 
 CELERY_BROKER_URL = REDIS_URL
@@ -382,30 +311,21 @@ CELERY_RESULT_BACKEND = REDIS_URL
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
-
 CELERY_TIMEZONE = TIME_ZONE
-
-
-# ============================================================
-# CELERY BEAT SCHEDULE
-# ============================================================
 
 CELERY_BEAT_SCHEDULE = {
     "send-emi-reminders": {
         "task": "apps.notifications.tasks.send_emi_reminders",
         "schedule": crontab(hour=8, minute=0),
     },
-
     "detect-overdue-loans": {
         "task": "apps.notifications.tasks.detect_overdue_loans",
         "schedule": crontab(hour=1, minute=0),
     },
-
     "check-budget-alerts": {
         "task": "apps.notifications.tasks.check_budget_alerts",
         "schedule": crontab(hour=9, minute=0),
     },
-
     "generate-recurring-transactions": {
         "task": (
             "apps.notifications.tasks."
@@ -413,47 +333,30 @@ CELERY_BEAT_SCHEDULE = {
         ),
         "schedule": crontab(hour=0, minute=30),
     },
-
     "send-monthly-financial-summaries": {
         "task": "apps.notifications.tasks.send_monthly_financial_summaries",
-        "schedule": crontab(
-            hour=6,
-            minute=0,
-            day_of_month=1,
-        ),
+        "schedule": crontab(hour=6, minute=0, day_of_month=1),
     },
-
     "process-reminders": {
         "task": "apps.notifications.tasks.process_reminders",
         "schedule": crontab(hour=7, minute=0),
     },
-
     "create-daily-portfolio-snapshot": {
         "task": "apps.investments.tasks.create_daily_portfolio_snapshot",
         "schedule": crontab(hour=2, minute=0),
     },
-
     "remind-stale-investment-prices": {
         "task": "apps.investments.tasks.remind_stale_investment_prices",
-        "schedule": crontab(
-            hour=8,
-            minute=30,
-            day_of_month=1,
-        ),
+        "schedule": crontab(hour=8, minute=30, day_of_month=1),
     },
 }
 
 
-# ============================================================
-# AI CONFIGURATION
-# ============================================================
+# =========================================================
+# FRONTEND & AI
+# =========================================================
 
-AI_API_KEY = env(
-    "AI_API_KEY",
-    default="",
-)
+FRONTEND_URL = os.getenv("FRONTEND_URL", "")
 
-AI_MODEL = env(
-    "AI_MODEL",
-    default="",
-)
+AI_API_KEY = os.getenv("AI_API_KEY", "")
+AI_MODEL = os.getenv("AI_MODEL", "")

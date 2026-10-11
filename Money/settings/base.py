@@ -50,10 +50,7 @@ SECRET_KEY = env("SECRET_KEY")
 DEBUG = env.bool("DEBUG", default=False)
 
 # Backend hostnames only: no https:// and no URL paths.
-ALLOWED_HOSTS = env_list(
-    "ALLOWED_HOSTS",
-    default="fin-backend-seven.vercel.app",
-)
+ALLOWED_HOSTS =["fin-backend-seven.vercel.app"]
 
 
 # ============================================================

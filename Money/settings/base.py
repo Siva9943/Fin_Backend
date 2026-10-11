@@ -54,15 +54,15 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+    "corsheaders.middleware.CorsMiddleware",  # Before CommonMiddleware
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
 ROOT_URLCONF = 'Money.urls'
@@ -127,20 +127,22 @@ EMAIL_USE_TLS = env.bool('EMAIL_USE_TLS', default=True)
 
 
 # CORS / CSRF
-
 CORS_ALLOWED_ORIGINS = [
     "https://sivafinancialtracker.netlify.app",
 ]
 
+CORS_ALLOW_CREDENTIALS = False  # JWT Bearer authentication
+
+# CSRF
 CSRF_TRUSTED_ORIGINS = [
     "https://sivafinancialtracker.netlify.app",
 ]
 
+# Reverse proxy
 SECURE_PROXY_SSL_HEADER = (
     "HTTP_X_FORWARDED_PROTO",
     "https",
 )
-
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 

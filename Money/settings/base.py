@@ -248,7 +248,7 @@ EMAIL_USE_TLS = env.bool(
 
 FRONTEND_URL = env(
     "FRONTEND_URL",
-    default="https://sivafinancialtracker.netlify.app/api",
+    default="https://sivafinancialtracker.netlify.app",
 )
 
 
